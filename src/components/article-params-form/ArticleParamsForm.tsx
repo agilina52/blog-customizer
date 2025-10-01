@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 import styles from './ArticleParamsForm.module.scss';
@@ -14,13 +14,24 @@ import {
 	fontColors,
 	fontFamilyOptions,
 } from 'src/constants/articleProps';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
+import clsx from 'clsx';
+import { Text } from 'src/ui/text';
 
 export const ArticleParamsForm = (props: {
 	onParamsChange: (params: ArticleStateType) => void;
 }) => {
-	const [isOpen, setIsOpen] = useState(false);
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [articleState, setArticleState] =
 		useState<ArticleStateType>(defaultArticleState);
+
+	const formRef = useRef<HTMLDivElement>(null);
+
+	useOutsideClickClose({
+		isOpen: isMenuOpen,
+		rootRef: formRef,
+		onChange: setIsMenuOpen,
+	});
 
 	const handleOptionChange = (key: keyof ArticleStateType, value: any) => {
 		setArticleState((prev) => ({
@@ -40,14 +51,21 @@ export const ArticleParamsForm = (props: {
 	};
 
 	return (
-		<>
-			<ArrowButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+		<div ref={formRef}>
+			<ArrowButton
+				isOpen={isMenuOpen}
+				onClick={() => setIsMenuOpen(!isMenuOpen)}
+			/>
 			<aside
-				className={`${styles.container} ${
-					isOpen ? styles.container_open : ''
-				}`}>
+				className={clsx(
+					styles.container,
+					isMenuOpen ? styles.container_open : ''
+				)}>
 				<form className={styles.form} onSubmit={handleSubmit}>
-					<h2 className={styles.title}>Задайте параметры</h2>
+					{/* <h2 className={styles.title}>Задайте параметры</h2> */}
+					<Text as='h2' size={31} weight={800} uppercase>
+						Задайте параметры
+					</Text>
 					<Select
 						selected={articleState.fontFamilyOption}
 						onChange={(option) =>
@@ -93,6 +111,6 @@ export const ArticleParamsForm = (props: {
 					</div>
 				</form>
 			</aside>
-		</>
+		</div>
 	);
 };
